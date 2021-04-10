@@ -4,6 +4,7 @@ def process_cmds(cmd: str) -> bool:
     if cmd_lower == "q":
         return False
     else:
+        print("Invalid command")
         print_help()
         return True
 
