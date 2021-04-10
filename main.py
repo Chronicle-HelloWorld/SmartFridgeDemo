@@ -2,11 +2,13 @@ import shlex
 
 from inventory_manager import *
 from order_manager import *
+from recipes import *
 from utils import *
 
 is_running: bool
 inv_manager: InventoryManager
 order_manager: OrderManager
+recipes: Recipes
 
 
 def process_cmds(args: list[str]) -> bool:
@@ -35,8 +37,34 @@ def process_cmds(args: list[str]) -> bool:
         return process_add(args[1:])
     elif args[0] == "order":
         return process_order(args[1:])
+    elif args[0] == "toprecipes":
+        return process_top_recipes(args[1:])
+    elif args[0] == "recipe":
+        return process_recipe(args[1:])
     else:
         return False
+
+    return True
+
+
+def process_recipe(args: list[str]) -> bool:
+    if len(args) == 0:
+        return False
+
+    for line in recipes.view_recipe(args[0], inv_manager.inventory):
+        print(line)
+
+    return True
+
+
+def process_top_recipes(args: list[str]) -> bool:
+    if len(args) == 0 or not (result := try_parse_int(args[0]))[0]:
+        return False
+
+    print(f"{'Name':<20}{'Match':>10}")
+
+    for recipe, score in recipes.get_best_recipes(result[1], inv_manager.inventory).items():
+        print(f"{recipe:<20}{score:>10.0f}")
 
     return True
 
@@ -60,6 +88,7 @@ def process_add(args: list[str]) -> bool:
 
     item = inv_manager.update_item(name, qty, brand, category)
     print(item)
+    return True
 
 
 def process_order(args: list[str]) -> bool:
@@ -132,6 +161,12 @@ def print_help():
     print()
     print("refill - Place orders in the cart for items with low inventory.")
     print()
+    print("toprecipes n:int\n"
+          "- View the top n best recipes for the current inventory.")
+    print()
+    print("recipe name:str\n"
+          "- View the recipe and inventory difference.")
+    print()
 
 
 if __name__ == "__main__":
@@ -139,6 +174,7 @@ if __name__ == "__main__":
     order_manager = OrderManager([Supermarket("Coles"), Supermarket("Woolworth")])
     inv_manager = InventoryManager(order_manager)
     inv_manager.refresh_inventory()
+    recipes = Recipes()
 
     while is_running:
         if process_cmds(shlex.split(input("Enter command: "))):
