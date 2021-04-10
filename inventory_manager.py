@@ -2,15 +2,19 @@ from math import isclose
 from typing import Optional
 
 import database_funcs as db
-from utils import try_parse_float
-from item import *
+from order_manager import *
+
 
 class InventoryManager:
     inventory: dict[str, Item]
+    low_threshold: dict[str, float]
+    order_manager: OrderManager
 
-    def __init__(self):
+    def __init__(self, order_manager: OrderManager):
         self.inventory = {}
-
+        self.low_threshold = defaultdict(float)
+        self.order_manager = order_manager
+        self.__load_low_inv_thresholds()
 
     def update_item(self, name: str, qty: float, brand: str, category: str) -> Item:
         key = InventoryManager.__item_key__(name)
@@ -55,6 +59,22 @@ class InventoryManager:
     def list_inventory(self) -> list[str]:
         return [str(item) for item in self.inventory.values()]
 
+    def list_low_inventory(self) -> list[str]:
+        # return a list of str representation of items (similar to list_inventory),
+        # with quantity below the values in self.low_threshold
+        # may also give the low threshold for each item
+        pass
+
+    def refill_low_inventory(self):
+        # for each of the items currently has low inventory,
+        # place an order with appropriate qty by calling the self.order_manager.cart_add_from_best
+        pass
+
     @staticmethod
     def __item_key__(name: str) -> str:
         return name.lower()
+
+    def __load_low_inv_thresholds(self):
+        # read a file for low inventory threshold for items
+        # place into self.low_threshold
+        pass

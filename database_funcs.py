@@ -17,7 +17,7 @@ def get_item_quantity(name: str, brand: str) -> float:
         c = con.cursor()
         try:
             quantity = \
-            c.execute(f"SELECT quantity FROM ingredients where name='{name}' and brand='{brand}'").fetchone()[0]
+                c.execute(f"SELECT quantity FROM ingredients where name='{name}' and brand='{brand}'").fetchone()[0]
         except:
             return 0
         con.commit()

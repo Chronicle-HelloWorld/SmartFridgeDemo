@@ -1,6 +1,5 @@
 from typing import TypeVar, Callable, Tuple
 
-
 T = TypeVar("T", float, int)
 
 
