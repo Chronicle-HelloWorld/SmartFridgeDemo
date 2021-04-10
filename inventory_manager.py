@@ -3,31 +3,7 @@ from typing import Optional
 
 import database_funcs as db
 from utils import try_parse_float
-
-
-class Item:
-    name: str
-    brand: str
-    category: str
-    __qty: float
-
-    def __init__(self, name: str):
-        self.name = name
-        self.__qty = 0
-        self.brand = ""
-        self.category = ""
-
-    @property
-    def qty(self):
-        return self.__qty
-
-    @qty.setter
-    def qty(self, value: float):
-        self.__qty = max(value, 0)
-
-    def __repr__(self):
-        return f"{self.name} - {self.qty:.2f}{f', brand: {self.brand}' if self.brand else ''}{f', category: {self.category}' if self.category else ''}"
-
+from item import *
 
 class InventoryManager:
     inventory: dict[str, Item]
@@ -35,26 +11,8 @@ class InventoryManager:
     def __init__(self):
         self.inventory = {}
 
-    def update_item(self, args: list[str]) -> Optional[Item]:
-        if len(args) < 2:
-            return None
 
-        name = args[0]
-        result = try_parse_float(args[1])
-
-        if not result[0]:
-            return None
-
-        qty = result[1]
-        brand = ""
-        category = ""
-
-        if len(args) > 2:
-            brand = args[2]
-
-        if len(args) > 3:
-            category = args[3]
-
+    def update_item(self, name: str, qty: float, brand: str, category: str) -> Item:
         key = InventoryManager.__item_key__(name)
 
         if not (item := self.inventory.get(key)):
