@@ -19,3 +19,7 @@ def try_parse_int(int_s: str) -> Tuple[bool, int]:
 
 def try_parse_float(float_s: str) -> Tuple[bool, float]:
     return try_parse(float_s, lambda s: float(s), lambda s: 0.0)
+
+
+def key(s: str) -> str:
+    return s.lower()

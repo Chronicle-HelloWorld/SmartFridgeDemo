@@ -33,10 +33,10 @@ class Recipe:
 
 
 class Recipes:
-    recipes: list[Recipe]
+    recipes: dict[str, Recipe]
 
     def __init__(self):
-        self.recipes = []
+        self.recipes = {}
         self.__load_recipes()
 
     def __load_recipes(self):
@@ -45,7 +45,7 @@ class Recipes:
         recipe = Recipe("name of my recipe")
         recipe.ingredients["ingredient 1"] = 3
         recipe.ingredients["ingredient 2"] = 1
-        self.recipes.append(recipe)
+        self.recipes[recipe.name] = recipe
 
     def get_best_recipes(self, n: int, inventory: dict[str, Item]) -> dict[str, float]:
         # with the given inventory, get the top n (highest score) recipes
