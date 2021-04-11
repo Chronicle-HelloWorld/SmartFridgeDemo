@@ -75,7 +75,12 @@ class InventoryManager:
     def refill_low_inventory(self):
         # for each of the items currently has low inventory,
         # place an order with appropriate qty by calling the self.order_manager.cart_add_from_best
-        pass
+        for item in self.inventory:
+            current_quantity = self.inventory[item].qty
+            threshold_qty = self.low_threshold[key(item)]
+            if current_quantity < threshold_qty:
+                order_qty = 4 * threshold_qty - current_quantity
+                self.order_manager.cart_add_from_best(item, order_qty)
 
     def __load_low_inv_thresholds(self):
         # read a file for low inventory threshold for items
