@@ -192,6 +192,9 @@ def print_help():
     print("recipe name:str\n"
           "- View the recipe and inventory difference.")
     print()
+    print("fillrecipe name:str\n"
+          "- Add missing ingredients to cart for the recipe.")
+    print()
 
 
 if __name__ == "__main__":

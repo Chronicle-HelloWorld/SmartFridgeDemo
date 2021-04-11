@@ -61,16 +61,16 @@ class InventoryManager:
         return [str(item) for item in self.inventory.values()]
 
     def list_low_inventory(self) -> list[str]:
-        # return a list of str representation of items (similar to list_inventory),
-        # with quantity below the values in self.low_threshold
-        # may also give the low threshold for each item
-        output = []
-        for item in self.inventory:
-            current_quantity = self.inventory[item].qty
-            if current_quantity < self.low_threshold[key(item)]:
-                output.append(item + ", " + str(current_quantity))
-        return output
+        output = [f"{'Name':<20}{'Current Qty':>15}{'Threshold':>15}"]
 
+        for item in self.inventory.values():
+            current_quantity = item.qty
+            threshold = self.low_threshold[key(item.name)]
+
+            if current_quantity < threshold:
+                output.append(f"{item.name:<20}{item.qty:>15.2f}{threshold:>15}")
+
+        return output
 
     def refill_low_inventory(self):
         # for each of the items currently has low inventory,
@@ -85,7 +85,6 @@ class InventoryManager:
     def __load_low_inv_thresholds(self):
         # read a file for low inventory threshold for items
         # place into self.low_threshold
-        pass
         with open('low_inventory_thresholds.csv') as file:
             rows = csv.reader(file)
             for row in rows:
