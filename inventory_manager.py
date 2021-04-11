@@ -66,9 +66,11 @@ class InventoryManager:
         # may also give the low threshold for each item
         output = []
         for item in self.inventory:
-            if item[1] < self.low_threshold[item[0]]:
-                output.append(item[0])
+            current_quantity = self.inventory[item].qty
+            if current_quantity < self.low_threshold[key(item)]:
+                output.append(item + ", " + str(current_quantity))
         return output
+
 
     def refill_low_inventory(self):
         # for each of the items currently has low inventory,
@@ -82,4 +84,4 @@ class InventoryManager:
         with open('low_inventory_thresholds.csv') as file:
             rows = csv.reader(file)
             for row in rows:
-                self.low_threshold[row[0]] = row[1]
+                self.low_threshold[key(row[0])] = float(row[1])
