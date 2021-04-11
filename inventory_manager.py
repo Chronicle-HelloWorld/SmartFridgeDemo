@@ -2,6 +2,7 @@ from math import isclose
 from typing import Optional
 
 import database_funcs as db
+import csv
 from order_manager import *
 
 
@@ -63,7 +64,11 @@ class InventoryManager:
         # return a list of str representation of items (similar to list_inventory),
         # with quantity below the values in self.low_threshold
         # may also give the low threshold for each item
-        pass
+        output = []
+        for item in self.inventory:
+            if item[1] < self.low_threshold[item[0]]:
+                output.append(item[0])
+        return output
 
     def refill_low_inventory(self):
         # for each of the items currently has low inventory,
@@ -78,3 +83,7 @@ class InventoryManager:
         # read a file for low inventory threshold for items
         # place into self.low_threshold
         pass
+        with open('low_inventory_thresholds.csv') as file:
+            rows = csv.reader(file)
+            for row in rows:
+                self.low_threshold[row[0]] = row[1]
