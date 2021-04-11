@@ -8,7 +8,7 @@ class Supermarket:
         self.name = name
 
     def query_price(self, item: str) -> float:
-        seed((item + self.name).__hash__())
+        seed((item + self.name).lower().__hash__())
         return round(uniform(1, 20), 2)
 
     def place_order(self, items: dict[str, float]):

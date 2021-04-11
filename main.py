@@ -41,8 +41,26 @@ def process_cmds(args: list[str]) -> bool:
         return process_top_recipes(args[1:])
     elif args[0] == "recipe":
         return process_recipe(args[1:])
+    elif args[0] == "fillrecipe":
+        return process_fill_recipe(args[1:])
     else:
         return False
+
+    return True
+
+
+def process_fill_recipe(args: list[str]) -> bool:
+    if len(args) == 0:
+        return False
+
+    if (recipe := recipes.recipes.get(args[0])) is None:
+        print("No recipe found.")
+        return True
+
+    for ingredient, qty in recipe.get_match(inv_manager.inventory).diff.items():
+        if qty < 0:
+            order_qty = abs(qty)
+            print(f"{order_qty} {ingredient} added to cart at {order_manager.cart_add_from_best(ingredient, abs(qty))}")
 
     return True
 
@@ -102,10 +120,13 @@ def process_order(args: list[str]) -> bool:
 
     if len(args) > 2:
         vendor = args[2]
-        order_manager.cart_add_from_vendor(name, qty, vendor)
-    else:
-        order_manager.cart_add_from_best(name, qty)
 
+        if not order_manager.cart_add_from_vendor(name, qty, vendor):
+            print(f"{vendor} is not currently registered.")
+    else:
+        vendor = order_manager.cart_add_from_best(name, qty)
+
+    print(f"{qty} {name} added to cart at {vendor}.")
     return True
 
 
@@ -128,7 +149,11 @@ def process_delorder(args: list[str]) -> bool:
 
         qty = result[1]
 
-    order_manager.cart_remove(name, vendor, qty)
+    if order_manager.cart_remove(name, vendor, qty):
+        print("Cart updated.")
+    else:
+        print("No matching order to update.")
+
     return True
 
 

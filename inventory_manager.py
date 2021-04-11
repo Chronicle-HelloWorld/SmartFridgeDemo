@@ -3,6 +3,7 @@ from typing import Optional
 
 import database_funcs as db
 from order_manager import *
+from utils import key
 
 
 class InventoryManager:
@@ -17,11 +18,11 @@ class InventoryManager:
         self.__load_low_inv_thresholds()
 
     def update_item(self, name: str, qty: float, brand: str, category: str) -> Item:
-        key = InventoryManager.__item_key__(name)
+        namekey = key(name)
 
-        if not (item := self.inventory.get(key)):
+        if not (item := self.inventory.get(namekey)):
             item = Item(name)
-            self.inventory[key] = item
+            self.inventory[namekey] = item
             item.brand = brand
             item.category = category
 
@@ -34,8 +35,7 @@ class InventoryManager:
         return item
 
     def remove_item(self, name: str) -> Optional[Item]:
-        key = InventoryManager.__item_key__(name)
-        item = self.inventory.pop(key, None)
+        item = self.inventory.pop(key(name), None)
 
         if item is not None:
             db.remove_item(item.name, item.brand)
@@ -54,7 +54,7 @@ class InventoryManager:
             item.qty = qty
             item.brand = brand
             item.category = category
-            self.inventory[InventoryManager.__item_key__(item.name)] = item
+            self.inventory[key(item.name)] = item
 
     def list_inventory(self) -> list[str]:
         return [str(item) for item in self.inventory.values()]
@@ -69,10 +69,6 @@ class InventoryManager:
         # for each of the items currently has low inventory,
         # place an order with appropriate qty by calling the self.order_manager.cart_add_from_best
         pass
-
-    @staticmethod
-    def __item_key__(name: str) -> str:
-        return name.lower()
 
     def __load_low_inv_thresholds(self):
         # read a file for low inventory threshold for items

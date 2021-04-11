@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from api_supermarkets import *
 from item import *
+from utils import key
 
 
 class Order:
@@ -24,59 +25,68 @@ class OrderManager:
     cart: dict[str, dict[str, Order]]
 
     def __init__(self, vendors: list[Supermarket]):
-        self.vendors = dict((vendor.name, vendor) for vendor in vendors)
+        self.vendors = dict((key(vendor.name), vendor) for vendor in vendors)
         self.cart = defaultdict(dict[str, Order])
 
-    def cart_add_from_best(self, name: str, qty: float):
+    def cart_add_from_best(self, name: str, qty: float) -> str:
         best_price, best_vendor = min((vendor.query_price(name), vendor) for vendor in self.vendors.values())
         self.__cart_add(name, qty, best_vendor, best_price)
+        return best_vendor.name
 
-    def cart_add_from_vendor(self, name: str, qty: float, vendor_name: str):
-        if (vendor := self.vendors.get(vendor_name)) is None:
-            return
+    def cart_add_from_vendor(self, name: str, qty: float, vendor_name: str) -> bool:
+        if (vendor := self.vendors.get(key(vendor_name))) is None:
+            return False
 
         self.__cart_add(name, qty, vendor)
+        return True
 
     def __cart_add(self, name: str, qty: float, vendor: Supermarket, price: float = None):
-        vendor_orders = self.cart[name]
+        vendor_orders = self.cart[key(name)]
+        vendor_key = key(vendor.name)
 
-        if (order := vendor_orders.get(vendor.name, None)) is None:
+        if (order := vendor_orders.get(vendor_key, None)) is None:
             item = Item(name)
 
             if price is None:
                 price = vendor.query_price(name)
 
             order = Order(item, price, vendor)
-            vendor_orders[vendor.name] = order
+            vendor_orders[vendor_key] = order
 
         order.item.qty += qty
 
-    def cart_remove(self, name: str = None, vendor: str = None, qty: float = None):
+    def cart_remove(self, name: str = None, vendor: str = None, qty: float = None) -> bool:
         if name is None:
             self.cart.clear()
-            return
+            return True
 
-        if (vendor_orders := self.cart.get(name, None)) is None:
-            return
+        if (vendor_orders := self.cart.get(key(name), None)) is None:
+            return False
 
         if vendor is None:
             vendor_orders.clear()
-            return
+            return True
+
+        vendor_key = key(vendor)
 
         if qty is None:
-            vendor_orders.pop(vendor)
-        elif (order := vendor_orders.get(vendor, None)) is not None:
+            vendor_orders.pop(vendor_key)
+        elif (order := vendor_orders.get(vendor_key, None)) is not None:
             order.item.qty -= qty
+        else:
+            return False
+
+        return True
 
     def cart_checkout(self):
         orders = defaultdict(dict[str, Order])
 
         for item, vendor_orders in self.cart.items():
             for vendor, order in vendor_orders.items():
-                orders[vendor][item] = order
+                orders[key(vendor)][key(item)] = order
 
         for vendor, vendor_orders in orders.items():
-            self.vendors[vendor].place_order(dict((o.item.name, o.item.qty) for o in vendor_orders.values()))
+            self.vendors[key(vendor)].place_order(dict((key(o.item.name), o.item.qty) for o in vendor_orders.values()))
 
         self.cart.clear()
 
